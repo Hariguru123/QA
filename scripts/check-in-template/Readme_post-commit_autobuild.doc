@@ -1,0 +1,43 @@
+post-commit_autobuild:
+
+Purpose:  
+********
+The purpose of this script is to send notify mail after any SVN commit and to trigger build script for the committed SVN branch.
+
+
+Usage:
+******
+1. Rename the script post-commit_autobuild to post-commit.
+2. Place it on actual SVN server hooks.
+
+
+Pre-requisites to use script:
+*****************************
+1. Install ssh on svn server.
+2. install sshpass on svn server.
+3. Communicate once with build server before using:
+ssh -vvv socplatform-qa@192.168.42.46
+
+
+Description: 
+**********
+1. It reads the SVN repository which are changed in the current commit.
+2. It passes the argument to build script, if the svn commits did on AONsensor, Native, Android
+3. It auto triggers build script if any commits done on SVN for the above branches.
+
+
+
+
+Below scripts are placed at build server to receive build trigger input from SVN server.
+
+select_build.pl:
+****************
+
+The purpose of this script is to select the dhanush build based on the argument passed from SVN server.
+It calls postcommit_buildscript.pl and starts build process and logs in text if SVN commit done on another paths other than AONsensor, Native, Android.
+
+
+postcommit_buildscript.pl:
+**************************
+
+This script is to checkout latest svn committed folder to build server and starts build process and send mails based on pass or failure.

@@ -1,0 +1,43 @@
+#!/bin/sh
+
+#Declaration of variables to store arguments and executables
+
+REPOS="$1" # repository path
+REV="$2" # revision number
+SVNLOOK="/opt/CollabNet_Subversion/bin/svnlook" # svnlook path
+AUTHOR=$($SVNLOOK author "$REPOS" -r "$REV") # To get the author name who does the check-in
+
+# To and From mail addresses
+TO="dhanush-sw@inedasystems.com" # who will receive the notifications 
+FROM="SVN@inedasystems.com" # what will be in "FROM" fields
+
+# svnnotify, which will take care of sending the email based on the options provided
+svnnotify \
+        --repos-path "$REPOS" \
+        --revision "$REV" \
+        --to $TO \
+        --from $FROM \
+	--svnlook $SVNLOOK \
+	--attach-diff true \
+	--subject-prefix "SVN-Check-in is done by the user - $AUTHOR with revision - " \
+	--no-first-line \ # No first line of log in the subject
+	--header "Check-in details of revison:$REV on the repository:$REPOS 
+	are included in this mail. For more clear details about changes please check the attached log file." \
+        --handler HTML::ColorDiff \ # make diff pretty
+        --subject-cx "check-in Notification mail"\# include additional info in the subject
+	2>&1 &
+
+# The below lines of code is to trigger the auto build in the build server for each check-in
+#URL=`$SVNLOOK changed "$1"`;
+#var1=$(echo $URL | cut -f1 -d' ');
+#var2=$(echo $URL | cut -f2 -d' ');
+
+#declare -a Array=($(echo $var2 |cut -d'/' --output-delimiter=" " -f1-))
+#length=${#Array[@]};
+#exec > /tmp/post-commit.log 2>&1
+#echo "${Array[2]}";
+
+#sshpass -p "Welcome123" ssh -t -t testuser@192.168.26.135 perl Desktop/review_scripts/select_build.pl ${Array[2]} >& /dev/null &
+
+exit 0
+

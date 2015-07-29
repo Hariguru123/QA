@@ -1,0 +1,63 @@
+#!/usr/bin/perl
+
+#**********************************************************************
+# 
+# File name: pre-commit
+# 
+# Location: 'hooks' directory of a repository for which we want to
+#           restrict the user to enter the check-in log detailsin 
+#           the SVN server 
+# 
+# Description: This script will run in the SVN server when a developer
+#              tries to do check-in
+#
+#**********************************************************************
+
+
+$svnlook = '/opt/CollabNet_Subversion/bin/svnlook'; 
+
+$repos = $ARGV[0]; 
+$txn = $ARGV[1]; 
+$comment = `$svnlook log -t "$txn" "$repos"`; 
+
+if(length($comment) == 0 ) { 
+  print STDERR "A comment is required"; 
+  exit(1); 
+}
+
+elsif($comment=~/(.+)\n(.+)\n(.+)\n/i)
+{
+$IssueId = $1;
+$IssueType = $2;
+$Reviewer = $3;
+
+	if(!($IssueId =~ /^Issue Id:\s*\d{4,10}\s*-\s*.+/i)){
+		
+		print STDERR "Issue Id is not entered in the below format\n Issue Id: <4 to 10 digit number> - <Feature/Bug title>";
+		exit(1);
+	}
+	if(!($IssueType =~ /^Issue Type:\s*(Bug|Feature|Enhancement|Other)\s*$/i)){
+	
+		print STDERR "Issue Type is not entered in the below format\n Issue Type: <Bug|Feature|Enhancement|Other>";
+		
+		exit(1);
+	
+	}
+	if(!($Reviewer =~ /^Reviewer:\s*\w+\s*/i)){
+	
+		print STDERR "Reviewer is not entered in the below format\n Reviewer: <Name>";
+		
+		exit(1);
+	
+	}	
+
+}
+else
+{
+	print STDERR "*********************ERROR MESSAGE********************\nEnter Issue Id, Issue Type and Reviewer Name exactly in the below format. Commenst are optional \nIssue Id:<4 to 10 digit issue id>-<Issue title from Bug tracking tool> \nIssue Type:<Feature/Bug/Other>\nReviewer:<Name>"; 
+	exit(1); 
+}
+
+exit(0);
+
+

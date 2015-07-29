@@ -1,0 +1,79 @@
+#!/bin/sh
+
+ 
+
+REPOS="$1" # repository path
+
+REV="$2" # revision number
+
+SVNLOOK="/opt/CollabNetSubversion/csvn/bin/svnlook" # svnlook path
+
+AUTHOR=$($SVNLOOK author "$REPOS" -r "$REV") # To get the author name who does the check-in
+
+ 
+
+# To and From mail addresses
+
+TO="ameerbhargav.kilari@inedasystems.com,hemanth.padmanabhan@inedasystems.com,divakar.kasamsetty@ineda
+
+systems.com,anilkumargoud.medak@inedasystems.com,kalpana.jeevraj@inedasystems.com,karthik.poosa@inedas
+
+ystems.com,kishor.arumilli@inedasystems.com,raghavendra.kakarla@inedasystems.com,ramakrishna.chatram@i
+
+nedasystems.com,ravikumar.gaddam@inedasystems.com,satish.baddipadige@inedasystems.com,vasavi.tammana@i
+
+nedasystems.com,vamshikrishna.gandu@inedasystems.com,venkatasuryanarayana.dommeti@inedasystems.com,ven
+
+kayamma.dudipally@inedasystems.com,yesubabu.gude@inedasystems.com" # who will receive the notification
+
+s
+
+#TO="yesubabu.gude@inedasystems.com" # who will receive the notifications
+
+FROM="SVN@inedasystems.com" # what will be in "FROM" fields
+
+ 
+
+# svnnotify, which will take care of sending the email based on the options provided
+
+svnnotify \
+
+        --repos-path "$REPOS" \
+
+        --revision "$REV" \
+
+        --to $TO \
+
+        --from $FROM \
+
+        --svnlook $SVNLOOK \
+
+        --attach-diff true \
+
+        --subject-prefix "SVN-Check-in is done by the user - $AUTHOR with revision - " \
+
+        --no-first-line \
+
+        --header "Check-in details of revison:$REV on the repository:$REPOS
+
+        are included in this mail. For more clear details about changes please check the attached log
+
+file." \
+
+        --handler HTML::ColorDiff \ # make diff pretty
+
+        --subject-cx "check-in Notification mail"\# include additional info in the subject
+
+        2>&1 &
+
+ 
+
+# The below line of code is to trigger the auto build in the build server for each check-in
+
+#sshpass -p "Welcome123" ssh -t -t testuser@192.168.26.135 perl Desktop/review_scripts/dhanushNative_b
+
+uild.pl >& /dev/null &
+
+ 
+
+exit 0
